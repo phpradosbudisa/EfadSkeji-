@@ -131,12 +131,48 @@ Posodobite `robots.txt`:
 
 ## Razporeditev (Deployment)
 
-### GitHub Pages
+### GitHub Pages (Priporočeno)
 
-1. Naložite vse datoteke v GitHub repozitorij
-2. Pojdite na Settings → Pages
-3. Izberite branch in folder
-4. Vaša stran bo na voljo na `https://username.github.io/repository-name`
+1. **Ustvarite GitHub repozitorij:**
+   ```bash
+   # Če še nimate Git repozitorija
+   git init
+   git add .
+   git commit -m "Initial commit - Efad Skejić website"
+   ```
+
+2. **Naložite na GitHub:**
+   - Ustvarite nov repozitorij na [GitHub](https://github.com/new)
+   - Repozitorij lahko imenujete `efadskejic` ali `efad-skejic-website`
+   - **POMEMBNO**: Repozitorij mora biti javen (public) za brezplačno GitHub Pages
+   - Povežite lokalni repozitorij:
+     ```bash
+     git remote add origin https://github.com/VAS-USERNAME/efadskejic.git
+     git branch -M main
+     git push -u origin main
+     ```
+
+3. **Omogočite GitHub Pages:**
+   - Pojdite na vaš repozitorij na GitHub
+   - Kliknite na **Settings** (Nastavitve)
+   - V levem meniju poiščite **Pages**
+   - Pod **Source** izberite:
+     - **Branch**: `main` (ali `master`)
+     - **Folder**: `/ (root)`
+   - Kliknite **Save**
+
+4. **Vaša stran bo na voljo na:**
+   - `https://VAS-USERNAME.github.io/efadskejic/`
+   - Ali `https://VAS-USERNAME.github.io/efad-skejic-website/` (odvisno od imena repozitorija)
+
+5. **Posodobite URL-je v datotekah:**
+   - Odprite `sitemap.xml` in zamenjajte `https://www.efadskejic.si/` z vašim GitHub Pages URL-jem
+   - Odprite `robots.txt` in posodobite sitemap URL
+   - Odprite `index.html` in posodobite Open Graph in Twitter Card URL-je (meta tagi)
+
+6. **Počakajte 1-2 minuti** za aktivacijo strani
+
+**Opomba**: `.nojekyll` datoteka je že vključena, kar pomeni, da GitHub Pages ne bo uporabljal Jekyll za obdelavo strani.
 
 ### Tradicionalni Hosting
 

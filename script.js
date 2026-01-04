@@ -698,7 +698,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     headerObserver.observe(header);
-  }
+  });
 
   // About Section - Split animation
   const aboutImage = document.querySelector('.about-image');
@@ -861,15 +861,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
 
-    // Portfolio images parallax
-    const portfolioImages = document.querySelectorAll('.portfolio-image');
-    portfolioImages.forEach((img, index) => {
-      const rect = img.getBoundingClientRect();
-      if (rect.top < windowHeight && rect.bottom > 0) {
-        const rate = (scrolled - rect.top) * (0.05 + index * 0.02);
-        img.style.transform = `translateY(${rate}px) scale(1.05)`;
-      }
-    });
+    // Portfolio images - no parallax (removed to prevent sliding during scroll)
 
     // Floating elements
     const floatingElements = document.querySelectorAll('.service-icon-wrapper, .contact-icon-wrapper');
@@ -1003,13 +995,34 @@ document.addEventListener('DOMContentLoaded', function() {
    ============================================ */
 
 document.addEventListener('DOMContentLoaded', function() {
-  // Add fade-in animation to body on load
-  document.body.style.opacity = '0';
-  document.body.style.transition = 'opacity 0.5s ease-in';
-  
-  window.addEventListener('load', function() {
+  // Add fade-in animation to body on load (with fallback)
+  // Only apply if page hasn't loaded yet
+  if (document.readyState === 'loading') {
+    document.body.style.opacity = '0';
+    document.body.style.transition = 'opacity 0.5s ease-in';
+    
+    // Show page when fully loaded
+    const showPage = () => {
+      document.body.style.opacity = '1';
+    };
+    
+    // Try window load event
+    if (document.readyState === 'complete') {
+      showPage();
+    } else {
+      window.addEventListener('load', showPage);
+      
+      // Fallback: show page after 1 second even if load event doesn't fire
+      setTimeout(() => {
+        if (document.body.style.opacity === '0') {
+          showPage();
+        }
+      }, 1000);
+    }
+  } else {
+    // Page already loaded, ensure it's visible
     document.body.style.opacity = '1';
-  });
+  }
 });
 
 /* ============================================

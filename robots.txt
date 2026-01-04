@@ -8,6 +8,8 @@ Allow: /
 # Disallow: /private/
 
 # Sitemap location
+# POMEMBNO: Posodobite z vašim GitHub Pages URL-jem
+# Primer: Sitemap: https://VAS-USERNAME.github.io/efadskejic/sitemap.xml
 Sitemap: https://www.efadskejic.si/sitemap.xml
 
 # Crawl-delay (optional, in seconds)
