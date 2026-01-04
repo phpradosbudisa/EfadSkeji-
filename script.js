@@ -422,60 +422,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-/* ============================================
-   Scroll to Top (Optional Enhancement)
-   ============================================ */
-
-// Add scroll to top button functionality if needed
-document.addEventListener('DOMContentLoaded', function() {
-  let scrollToTopBtn = document.createElement('button');
-  scrollToTopBtn.innerHTML = '↑';
-  scrollToTopBtn.className = 'scroll-to-top';
-  scrollToTopBtn.setAttribute('aria-label', 'Nazaj na vrh');
-  scrollToTopBtn.style.cssText = `
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    display: none;
-    z-index: 999;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s ease;
-  `;
-  
-  document.body.appendChild(scrollToTopBtn);
-  
-  window.addEventListener('scroll', function() {
-    if (window.pageYOffset > 300) {
-      scrollToTopBtn.style.display = 'block';
-    } else {
-      scrollToTopBtn.style.display = 'none';
-    }
-  });
-  
-  scrollToTopBtn.addEventListener('click', function() {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-    trackEvent('Navigation', 'scroll_to_top', 'Scroll to top clicked');
-  });
-  
-  scrollToTopBtn.addEventListener('mouseenter', function() {
-    this.style.transform = 'scale(1.1)';
-  });
-  
-  scrollToTopBtn.addEventListener('mouseleave', function() {
-    this.style.transform = 'scale(1)';
-  });
-});
 
 /* ============================================
    Lazy Loading Images (if not using native)
@@ -786,12 +732,18 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Counter animation for stats with scroll trigger
-  function animateCounter(element, target, duration = 2000) {
-    if (element.dataset.animated === 'true') return;
+  function animateCounter(element, target, suffix, duration = 2000) {
+    // Check if already animated - if so, just set to final value
+    if (element.dataset.animated === 'true') {
+      element.textContent = target + suffix;
+      return;
+    }
+    
     element.dataset.animated = 'true';
+    element.dataset.targetValue = target;
+    element.dataset.targetSuffix = suffix;
     
     let start = 0;
-    const suffix = element.textContent.match(/[^0-9]/g)?.join('') || '';
     const increment = target / (duration / 16);
     
     const timer = setInterval(() => {
@@ -805,19 +757,69 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 16);
   }
 
-  // Stats observer with complex trigger
+  // Stats observer with complex trigger - only animate once
   const statsObserver = createAdvancedObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
         const statNumbers = entry.target.querySelectorAll('.stat-number, .stats-number');
         statNumbers.forEach((stat, index) => {
-          const text = stat.textContent;
-          const number = parseInt(text.replace(/\D/g, ''));
+          // Skip if already animated
+          if (stat.dataset.animated === 'true') {
+            // Restore final value if it was reset
+            const target = stat.dataset.targetValue;
+            const suffix = stat.dataset.targetSuffix || '';
+            if (target) {
+              stat.textContent = target + suffix;
+            } else if (stat.dataset.originalText) {
+              // For non-numeric values like "24/7"
+              stat.textContent = stat.dataset.originalText;
+            }
+            return;
+          }
+          
+          const originalText = stat.textContent.trim();
+          
+          // Special handling for "24/7" - don't animate, just keep as is
+          if (originalText === '24/7' || originalText.includes('/')) {
+            stat.dataset.animated = 'true';
+            stat.dataset.originalText = originalText;
+            return; // Don't animate text values with slashes
+          }
+          
+          // Get original value from data attribute or parse from text
+          let number, suffix;
+          if (stat.dataset.originalValue) {
+            number = parseInt(stat.dataset.originalValue);
+            suffix = stat.dataset.originalSuffix || '';
+          } else {
+            const text = stat.textContent;
+            number = parseInt(text.replace(/\D/g, ''));
+            suffix = text.match(/[^0-9]/g)?.join('') || '';
+            // Store original values
+            stat.dataset.originalValue = number;
+            stat.dataset.originalSuffix = suffix;
+          }
+          
           if (number) {
             setTimeout(() => {
-              stat.textContent = '0' + (text.includes('+') ? '+' : '');
-              animateCounter(stat, number, 2000);
+              stat.textContent = '0' + suffix;
+              animateCounter(stat, number, suffix, 2000);
             }, index * 300);
+          }
+        });
+      } else {
+        // When element leaves viewport, ensure values stay at final number
+        const statNumbers = entry.target.querySelectorAll('.stat-number, .stats-number');
+        statNumbers.forEach(stat => {
+          if (stat.dataset.animated === 'true') {
+            if (stat.dataset.targetValue) {
+              const target = stat.dataset.targetValue;
+              const suffix = stat.dataset.targetSuffix || stat.dataset.originalSuffix || '';
+              stat.textContent = target + suffix;
+            } else if (stat.dataset.originalText) {
+              // For non-numeric values like "24/7"
+              stat.textContent = stat.dataset.originalText;
+            }
           }
         });
       }
